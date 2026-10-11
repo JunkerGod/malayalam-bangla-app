@@ -1,0 +1,23 @@
+{
+  "id": "ml-test",
+  "lang": "ml",
+  "title": "Device test",
+  "lessons": [
+    {
+      "id": "ml-test-l1",
+      "title": "Device test",
+      "items": [
+        {
+          "id": "ml-test-001",
+          "script": "സുഖമാണോ?",
+          "romanization": "sukhamaano?",
+          "english": "Are you well?",
+          "audio": "",
+          "notes": "",
+          "tags": ["test"],
+          "needs_check": false
+        }
+      ]
+    }
+  ]
+}

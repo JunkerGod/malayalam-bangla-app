@@ -1,0 +1,23 @@
+{
+  "id": "bn-test",
+  "lang": "bn",
+  "title": "Device test",
+  "lessons": [
+    {
+      "id": "bn-test-l1",
+      "title": "Device test",
+      "items": [
+        {
+          "id": "bn-test-001",
+          "script": "আপনি কেমন আছেন?",
+          "romanization": "apni kemon achhen?",
+          "english": "How are you? (respectful, for elders like her parents)",
+          "audio": "",
+          "notes": "apni is the respectful 'you'. Use it with her parents; use tumi with your girlfriend.",
+          "tags": ["test"],
+          "needs_check": false
+        }
+      ]
+    }
+  ]
+}

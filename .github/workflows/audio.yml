@@ -1,0 +1,69 @@
+# Generates audio for new or changed content with Azure AI Speech and commits
+# it back to the same branch. The API key lives in GitHub secrets only.
+name: Generate audio
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'content/**'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: audio-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  check-key:
+    runs-on: ubuntu-latest
+    outputs:
+      has_key: ${{ steps.check.outputs.has_key }}
+    steps:
+      - id: check
+        env:
+          KEY: ${{ secrets.AZURE_SPEECH_KEY }}
+        run: |
+          if [ -n "$KEY" ]; then
+            echo "has_key=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::warning::The AZURE_SPEECH_KEY secret is not set, so no audio was generated. See SETUP.md step 3."
+          fi
+
+  audio:
+    needs: check-key
+    if: needs.check-key.outputs.has_key == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 340
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Generate missing audio
+        env:
+          AZURE_SPEECH_KEY: ${{ secrets.AZURE_SPEECH_KEY }}
+          AZURE_SPEECH_REGION: ${{ secrets.AZURE_SPEECH_REGION }}
+        run: npm run audio
+
+      - name: Validate content
+        run: npm run validate -- --strict --flagged
+
+      - name: Commit audio
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/audio content
+          if git diff --cached --quiet; then
+            echo "No new audio."
+            exit 0
+          fi
+          git commit -m "Add generated audio"
+          git pull --rebase origin "${GITHUB_REF_NAME}"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
